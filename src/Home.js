@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Book from "./Book";
-import { getAll } from "./BooksAPI";
+import { getAll, update } from "./BooksAPI";
 
 function Home() {
   const [books, setBooks] = useState([]);
@@ -14,6 +14,19 @@ function Home() {
         alert("Something went wrong while fetching your books");
       });
   }, []);
+
+  function updateBook(book, shelf) {
+    update(book, shelf)
+      .then((res) => {
+        const slice = books.slice();
+        // update the updated book shelf in our local list on success
+        slice.find(({ id }) => id === book.id).shelf = shelf;
+        setBooks(slice);
+      })
+      .catch(() => {
+        alert("Something went wrong while updating the book");
+      });
+  }
 
   return (
     <div className="list-books">
@@ -31,7 +44,7 @@ function Home() {
                   .map((book) => {
                     return (
                       <li key={book.id}>
-                        <Book book={book} />
+                        <Book book={book} onUpdateBook={updateBook} />
                       </li>
                     );
                   })}
@@ -47,7 +60,7 @@ function Home() {
                   .map((book) => {
                     return (
                       <li key={book.id}>
-                        <Book book={book} />
+                        <Book book={book} onUpdateBook={updateBook} />
                       </li>
                     );
                   })}
@@ -63,7 +76,7 @@ function Home() {
                   .map((book) => {
                     return (
                       <li key={book.id}>
-                        <Book book={book} />
+                        <Book book={book} onUpdateBook={updateBook} />
                       </li>
                     );
                   })}

@@ -1,4 +1,4 @@
-function Book({ book }) {
+function Book({ book, onUpdateBook }) {
   return (
     <div className="book">
       <div className="book">
@@ -12,7 +12,12 @@ function Book({ book }) {
             }}
           ></div>
           <div className="book-shelf-changer">
-            <select>
+            <select
+              onChange={({ currentTarget }) =>
+                onUpdateBook(book, currentTarget.value)
+              }
+              value={book.shelf}
+            >
               <option value="move" disabled>
                 Move to...
               </option>
