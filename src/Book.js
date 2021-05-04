@@ -16,9 +16,9 @@ function Book({ book, onUpdateBook }) {
               onChange={({ currentTarget }) =>
                 onUpdateBook(book, currentTarget.value)
               }
-              value={book.shelf}
+              value={book.shelf || "none"}
             >
-              <option value="move" disabled>
+              <option value="" disabled>
                 Move to...
               </option>
               <option value="currentlyReading">Currently Reading</option>
@@ -29,7 +29,7 @@ function Book({ book, onUpdateBook }) {
           </div>
         </div>
         <div className="book-title">{book.title}</div>
-        <div className="book-authors">{book.authors.join(" - ")}</div>
+        <div className="book-authors">{book.authors?.join(" - ")}</div>
       </div>
     </div>
   );

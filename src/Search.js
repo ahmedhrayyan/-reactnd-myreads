@@ -1,6 +1,42 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import Book from "./Book";
+import { search, update } from "./BooksAPI";
 
 function Search() {
+  const [books, setBooks] = useState([]);
+
+  function updateBook(book, shelf) {
+    update(book, shelf)
+      .then((res) => {
+        const slice = books.slice();
+        // update the updated book shelf in our local list on success
+        slice.find(({ id }) => id === book.id).shelf = shelf;
+        setBooks(slice);
+      })
+      .catch(() => {
+        alert("Something went wrong while updating the book");
+      });
+  }
+
+  function handleSearch(evt) {
+    evt.preventDefault();
+    const data = new FormData(evt.currentTarget);
+    const query = data.get("query");
+    if (query) {
+      search(data.get("query"))
+        .then((books) => {
+          if (books.error) setBooks([]);
+          else setBooks(books);
+        })
+        .catch(() => {
+          alert("Something went wrong while fetching your books");
+        });
+    } else {
+      setBooks([]);
+    }
+  }
+
   return (
     <div className="search-books">
       <div className="search-books-bar">
@@ -8,19 +44,25 @@ function Search() {
           Close
         </Link>
         <div className="search-books-input-wrapper">
-          {/*
-                  NOTES: The search from BooksAPI is limited to a particular set of search terms.
-                  You can find these search terms here:
-                  https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
-
-                  However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
-                  you don't find a specific author or title. Every search is limited by search terms.
-                */}
-          <input type="text" placeholder="Search by title or author" />
+          <form onSubmit={handleSearch}>
+            <input
+              type="text"
+              name="query"
+              placeholder="Search by title or author"
+            />
+          </form>
         </div>
       </div>
       <div className="search-books-results">
-        <ol className="books-grid"></ol>
+        <ol className="books-grid">
+          {books.map((book) => {
+            return (
+              <li key={book.id}>
+                <Book book={book} onUpdateBook={updateBook} />
+              </li>
+            );
+          })}
+        </ol>
       </div>
     </div>
   );
