@@ -28,10 +28,11 @@ function Search() {
 
     Promise.all([getAll(), search(query)])
       .then((values) => {
-        if (books.error) return setBooks([]);
-
         const homeBooks = values[0];
         const searchBooks = values[1];
+
+        if (searchBooks.error) return setBooks([]);
+        
         // merge common home & search books first
         homeBooks.forEach(({ id, shelf }) => {
           const target = searchBooks.find((book) => book.id === id);
