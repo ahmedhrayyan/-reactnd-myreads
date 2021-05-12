@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Book from "./Book";
-import { search, update } from "./BooksAPI";
+import { getAll, search, update } from "./BooksAPI";
 
 function Search() {
   const [books, setBooks] = useState([]);
@@ -23,18 +23,25 @@ function Search() {
     evt.preventDefault();
     const data = new FormData(evt.currentTarget);
     const query = data.get("query");
-    if (query) {
-      search(data.get("query"))
-        .then((books) => {
-          if (books.error) setBooks([]);
-          else setBooks(books);
-        })
-        .catch(() => {
-          alert("Something went wrong while fetching your books");
+
+    if (!query) return setBooks([]);
+
+    Promise.all([getAll(), search(query)])
+      .then((values) => {
+        if (books.error) return setBooks([]);
+
+        const homeBooks = values[0];
+        const searchBooks = values[1];
+        // merge common home & search books first
+        homeBooks.forEach(({ id, shelf }) => {
+          const target = searchBooks.find((book) => book.id === id);
+          if (target) target.shelf = shelf;
         });
-    } else {
-      setBooks([]);
-    }
+        setBooks(searchBooks);
+      })
+      .catch(() => {
+        alert("Something went wrong while fetching your books");
+      });
   }
 
   return (
