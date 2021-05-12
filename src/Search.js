@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Book from "./Book";
 import { getAll, search, update } from "./BooksAPI";
 
 function Search() {
   const [books, setBooks] = useState([]);
+  const [homeBooks, setHomeBooks] = useState([]);
+
+  // mount logic
+  useEffect(() => {
+    getAll().then((books) => setHomeBooks(books));
+  }, []);
 
   function updateBook(book, shelf) {
     update(book, shelf)
@@ -20,20 +26,15 @@ function Search() {
   }
 
   function handleSearch(evt) {
-    evt.preventDefault();
-    const data = new FormData(evt.currentTarget);
-    const query = data.get("query");
+    const query = evt.currentTarget.value;
 
     if (!query) return setBooks([]);
 
-    Promise.all([getAll(), search(query)])
-      .then((values) => {
-        const homeBooks = values[0];
-        const searchBooks = values[1];
-
+    search(query)
+      .then((searchBooks) => {
         if (searchBooks.error) return setBooks([]);
-        
-        // merge common home & search books first
+
+        // add shelf attr to searchBooks
         homeBooks.forEach(({ id, shelf }) => {
           const target = searchBooks.find((book) => book.id === id);
           if (target) target.shelf = shelf;
@@ -52,13 +53,12 @@ function Search() {
           Close
         </Link>
         <div className="search-books-input-wrapper">
-          <form onSubmit={handleSearch}>
-            <input
-              type="text"
-              name="query"
-              placeholder="Search by title or author"
-            />
-          </form>
+          <input
+            type="text"
+            name="query"
+            placeholder="Search by title or author"
+            onChange={handleSearch}
+          />
         </div>
       </div>
       <div className="search-books-results">
